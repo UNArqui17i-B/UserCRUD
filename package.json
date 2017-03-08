@@ -2,7 +2,7 @@
   "name": "userCRUD",
   "private": true,
   "version": "0.0.1",
-  "description": "User management",
+  "description": "User management microservice",
   "main": "./src/index.js",
   "scripts": {
     "eslint": "eslint src test",
