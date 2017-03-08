@@ -1,0 +1,19 @@
+#%RAML 1.0
+title: Books CRUD API
+baseUri: http://localhost:4000
+mediaType: application/json
+
+/users:
+    description: Manage users
+    get:
+        description: List of all users
+    post:
+        description: Create a user
+
+    /{id}:
+        get:
+            description: Search a user
+        put:
+            description: Update a user
+        delete:
+            description: Delete a user
