@@ -6,7 +6,6 @@ services:
       - '3000:5984'
 
   user-crud:
-    #image: blinkbox/user-crud
     build: .
     environment:
       PORT: '3000'
