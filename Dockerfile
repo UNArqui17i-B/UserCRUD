@@ -1,4 +1,4 @@
-FROM node:7-slim
+FROM node:7.6-slim
 
 MAINTAINER Miguel Asencio <maasencioh@gmail.com>
 

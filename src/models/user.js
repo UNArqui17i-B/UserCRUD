@@ -13,56 +13,44 @@ const dbUrl = url + 'blinkbox_users';
 let User = {};
 const idGenerator = new Puid();
 
-User.checkDB = () => {
+User.checkDB = (func) => {
+    // eslint-disable-next-line no-unused-vars
     request.head(dbUrl, (err, res, body) => {
-        if (err || (res.statusCode === status.INTERNAL_SERVER_ERROR) || (res.statusCode === status.NOT_FOUND)) {
-            return false;
+        if (err || (res.statusCode === status.INTERNAL_SERVER_ERROR)) {
+            func(err, res);
         } else {
-            request.put(dbUrl, (err, res, body) => {
-                return !(err || (res.statusCode === status.INTERNAL_SERVER_ERROR) ||
-                    (res.statusCode === status.NOT_FOUND));
-            });
+            request.put(dbUrl, func);
         }
     });
 };
 
-User.create = (user) => {
+User.create = (user, func) => {
     let id = idGenerator.generate();
     request({
         method: 'PUT',
         url: `${dbUrl}/${id}`,
-        form: user
-    }, (err, res, body) =>
-            !(err || (res.statusCode === status.INTERNAL_SERVER_ERROR) || (res.statusCode === status.NOT_FOUND))
-    );
+        body: JSON.stringify(user)
+    }, func);
 };
 
-User.delete = (id) => {
-    request.delete(`${dbUrl}/${id}`, (err, res, body) =>
-        !(err || (res.statusCode === status.INTERNAL_SERVER_ERROR) || (res.statusCode === status.NOT_FOUND))
-    );
+User.delete = (id, rev, func) => {
+    request(`${dbUrl}/${id}?rev=${rev}`, func);
 };
 
-User.update = (id, user) => {
+User.update = (id, rev, user, func) => {
     request({
         method: 'PUT',
-        url: `${dbUrl}/${id}`,
-        form: user
-    }, (err, res, body) =>
-            !(err || (res.statusCode === status.INTERNAL_SERVER_ERROR) || (res.statusCode === status.NOT_FOUND))
-    );
+        url: `${dbUrl}/${id}?rev=${rev}`,
+        body: JSON.stringify(user)
+    }, func);
 };
 
-User.findById = (id) => {
-    request.get(`${dbUrl}/${id}`, (err, res, body) => {
-        if (!(err || (res.statusCode === status.INTERNAL_SERVER_ERROR) || (res.statusCode === status.NOT_FOUND))) {
-            return body;
-        }
-    });
+User.findById = (id, func) => {
+    request.get(`${dbUrl}/${id}`, func);
 };
 
-User.findAll = () => {
-    request.get(dbUrl + '/_all_docs', (err, res, body) => body);
+User.findAll = (func) => {
+    request.get(dbUrl + '/_all_docs', func);
 };
 
 module.exports = User;
