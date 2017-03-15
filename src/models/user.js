@@ -2,6 +2,7 @@
 
 const request = require('request');
 const status = require('http-status');
+const crypto = require('crypto');
 const Puid = require('puid');
 const Joi = require('joi');
 
@@ -40,6 +41,11 @@ User.create = (user, func) => {
     if (result.error) {
         func(result.error, {statusCode: status.BAD_REQUEST}, result.error.details)
     } else {
+        // encrypt password
+        user.salt = crypto.randomBytes(16).toString('hex');
+        user.hash = crypto.pbkdf2Sync(user.password, user.salt, 1000, 224, 'sha224').toString('hex');
+        delete user.password;
+
         request({
             method: 'PUT',
             url: `${dbUrl}/${id}`,
