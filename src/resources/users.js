@@ -31,10 +31,10 @@ module.exports = function (User) {
     // create a User
     router.post('/', function (req, res) {
         User.create(req.body, (err, header, body) => {
-            if (body) {
-                res.status(status.CREATED).send(body);
+            if (!body || err) {
+                res.status(header.statusCode).send(body || {});
             } else {
-                res.status(header.statusCode).send({});
+                res.status(status.CREATED).send(body);
             }
         });
     });

@@ -3,6 +3,7 @@
 const request = require('request');
 const status = require('http-status');
 const Puid = require('puid');
+const Joi = require('joi');
 
 // CouchDB url
 const PORT = process.env.PORT || 5984;
@@ -12,6 +13,13 @@ const dbUrl = url + 'blinkbox_users';
 
 let User = {};
 const idGenerator = new Puid();
+
+// User schema
+const schema = Joi.object().keys({
+    name: Joi.string().regex(/^[a-zA-Z\s]{3,30}$/).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required()
+}).with('name', 'email', 'password');
 
 User.checkDB = (func) => {
     // eslint-disable-next-line no-unused-vars
@@ -26,11 +34,18 @@ User.checkDB = (func) => {
 
 User.create = (user, func) => {
     let id = idGenerator.generate();
-    request({
-        method: 'PUT',
-        url: `${dbUrl}/${id}`,
-        body: JSON.stringify(user)
-    }, func);
+
+    const result = Joi.validate(user, schema);
+
+    if (result.error) {
+        func(result.error, {statusCode: status.BAD_REQUEST}, result.error.details)
+    } else {
+        request({
+            method: 'PUT',
+            url: `${dbUrl}/${id}`,
+            body: JSON.stringify(user)
+        }, func);
+    }
 };
 
 User.delete = (id, rev, func) => {
