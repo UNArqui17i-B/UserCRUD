@@ -61,5 +61,16 @@ module.exports = function (User) {
         });
     });
 
+    // check valid user and password
+    router.post('/login', function (req, res) {
+        User.login(req.body, (err, header, body) => {
+            if (!body || err) {
+                res.status(header.statusCode).send(body || {});
+            } else {
+                res.status(status.OK).send(body);
+            }
+        });
+    });
+
     return router;
 };

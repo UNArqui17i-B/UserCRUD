@@ -16,11 +16,16 @@ let User = {};
 const idGenerator = new Puid();
 
 // User schema
-const schema = Joi.object().keys({
+const userSchema = Joi.object().keys({
     name: Joi.string().regex(/^[a-zA-Z\s]{3,30}$/).required(),
     email: Joi.string().email().required(),
     password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required()
-}).with('name', 'email', 'password');
+});
+
+const loginSchema = Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required()
+});
 
 User.checkDB = (func) => {
     // eslint-disable-next-line no-unused-vars
@@ -36,7 +41,7 @@ User.checkDB = (func) => {
 User.create = (user, func) => {
     let id = idGenerator.generate();
 
-    const result = Joi.validate(user, schema);
+    const result = Joi.validate(user, userSchema);
 
     if (result.error) {
         func(result.error, {statusCode: status.BAD_REQUEST}, result.error.details)
@@ -62,7 +67,7 @@ User.update = (id, rev, user, func) => {
     request({
         method: 'PUT',
         url: `${dbUrl}/${id}?rev=${rev}`,
-        body: JSON.stringify(user)
+        json: user
     }, func);
 };
 
@@ -72,6 +77,35 @@ User.findById = (id, func) => {
 
 User.findAll = (func) => {
     request.get(dbUrl + '/_all_docs', func);
+};
+
+User.login = (user, func) => {
+    const result = Joi.validate(user, loginSchema);
+
+    if (result.error) {
+        func(result.error, {statusCode: status.BAD_REQUEST}, result.error.details)
+    } else {
+        const query = {
+            selector: {
+                email: user.email
+            }
+        };
+
+        request({
+            method: 'POST',
+            url: `${dbUrl}/_find`,
+            json: query
+        }, (err, res, body) => {
+            const finded = body.docs[0];
+            if (err || (res.statusCode === status.INTERNAL_SERVER_ERROR)) {
+                func(err, res);
+            } else {
+                // decrypt password
+                const hash = crypto.pbkdf2Sync(user.password, finded.salt, 1000, 224, 'sha224').toString('hex');
+                func(null, {statusCode: status.OK}, {result: hash === finded.hash});
+            }
+        });
+    }
 };
 
 module.exports = User;
