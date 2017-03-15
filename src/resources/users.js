@@ -10,7 +10,7 @@ module.exports = function (User) {
     router.get('/', function (req, res) {
         User.findAll((err, header, body) => {
             if (body) {
-                res.status(status.OK).send(body.rows);
+                res.status(status.OK).send(JSON.parse(body).rows);
             } else {
                 res.status(header.statusCode).send({});
             }
