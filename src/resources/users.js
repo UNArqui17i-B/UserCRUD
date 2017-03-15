@@ -10,7 +10,7 @@ module.exports = function (User) {
     router.get('/', function (req, res) {
         User.findAll((err, header, body) => {
             if (body) {
-                res.status(status.OK).send(body.rows);
+                res.status(status.OK).send(JSON.parse(body).rows);
             } else {
                 res.status(header.statusCode).send({});
             }
@@ -31,10 +31,10 @@ module.exports = function (User) {
     // create a User
     router.post('/', function (req, res) {
         User.create(req.body, (err, header, body) => {
-            if (body) {
-                res.status(status.CREATED).send(body);
+            if (!body || err) {
+                res.status(header.statusCode).send(body || {});
             } else {
-                res.status(header.statusCode).send({});
+                res.status(status.CREATED).send(body);
             }
         });
     });
@@ -57,6 +57,17 @@ module.exports = function (User) {
                 res.status(status.ACCEPTED).send(body);
             } else {
                 res.status(header.statusCode).send({});
+            }
+        });
+    });
+
+    // check valid user and password
+    router.post('/login', function (req, res) {
+        User.login(req.body, (err, header, body) => {
+            if (!body || err) {
+                res.status(header.statusCode).send(body || {});
+            } else {
+                res.status(status.OK).send(body);
             }
         });
     });

@@ -13,7 +13,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 const User = require('./models/user');
-User.checkDB((err, res) => console.error(err));
+User.checkDB((err) => {
+    if(err) console.error(err);
+});
 
 // routes
 app.use('/users', require('./resources/users')(User));
