@@ -54,7 +54,7 @@ User.create = (user, func) => {
         request({
             method: 'PUT',
             url: `${dbUrl}/${id}`,
-            body: JSON.stringify(user)
+            json: user
         }, func);
     }
 };
