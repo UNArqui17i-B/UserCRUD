@@ -19,7 +19,7 @@ User.checkDB((err) => {
 });
 
 // routes
-app.use('/users', require('./services/users')(User));
+app.use('/users', require('./services/user')(User));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
