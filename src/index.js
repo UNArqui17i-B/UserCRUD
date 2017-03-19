@@ -14,7 +14,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const User = require('./models/user');
 User.checkDB((err) => {
-    if(err) console.error(err);
+    // eslint-disable-next-line no-console
+    if (err) console.error(err);
 });
 
 // routes

@@ -28,10 +28,9 @@ const loginSchema = Joi.object().keys({
 });
 
 User.checkDB = (func) => {
-    // eslint-disable-next-line no-unused-vars
     request.head(dbUrl, (err, res, body) => {
         if (err || (res.statusCode === status.INTERNAL_SERVER_ERROR)) {
-            func(err, res);
+            func(err, res, body);
         } else {
             request.put(dbUrl, func);
         }
@@ -44,7 +43,7 @@ User.create = (user, func) => {
     const result = Joi.validate(user, userSchema);
 
     if (result.error) {
-        func(result.error, {statusCode: status.BAD_REQUEST}, result.error.details)
+        func(result.error, {statusCode: status.BAD_REQUEST}, result.error.details);
     } else {
         // encrypt password
         user.salt = crypto.randomBytes(16).toString('hex');
@@ -60,7 +59,7 @@ User.create = (user, func) => {
 };
 
 User.delete = (id, rev, func) => {
-    request(`${dbUrl}/${id}?rev=${rev}`, func);
+    request.delete(`${dbUrl}/${id}?rev=${rev}`, func);
 };
 
 User.update = (id, rev, user, func) => {
@@ -83,7 +82,7 @@ User.login = (user, func) => {
     const result = Joi.validate(user, loginSchema);
 
     if (result.error) {
-        func(result.error, {statusCode: status.BAD_REQUEST}, result.error.details)
+        func(result.error, {statusCode: status.BAD_REQUEST}, result.error.details);
     } else {
         const query = {
             selector: {

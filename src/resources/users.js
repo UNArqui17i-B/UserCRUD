@@ -6,7 +6,7 @@ const status = require('http-status');
 module.exports = function (User) {
     const router = express.Router();
 
-    // list of all books
+    // list of all users
     router.get('/', function (req, res) {
         User.findAll((err, header, body) => {
             if (body) {
@@ -21,7 +21,7 @@ module.exports = function (User) {
     router.get('/:id', function (req, res) {
         User.findById(req.params.id, (err, header, body) => {
             if (body) {
-                res.status(status.OK).send(body);
+                res.status(header.statusCode || status.OK).send(body);
             } else {
                 res.status(header.statusCode).send({});
             }
