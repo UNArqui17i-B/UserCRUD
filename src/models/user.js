@@ -96,7 +96,7 @@ User.login = (user, func) => {
             json: query
         }, (err, res, body) => {
             const finded = body.docs[0];
-            if (err || (res.statusCode === status.INTERNAL_SERVER_ERROR)) {
+            if (err || (res.statusCode === status.INTERNAL_SERVER_ERROR || !finded)) {
                 func(err, res);
             } else {
                 // decrypt password
