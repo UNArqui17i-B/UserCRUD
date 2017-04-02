@@ -66,7 +66,7 @@ User.findById = (id) => request.get(`${dbUrl}/${id}`);
 
 User.findAll = request.get(dbUrl + '/_all_docs');
 
-User.login = (user) => new Promise((reject, resolve) => {
+User.login = (user) => new Promise((resolve, reject) => {
     const result = Joi.validate(user, loginSchema);
 
     if (result.error) {
