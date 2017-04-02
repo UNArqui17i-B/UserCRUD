@@ -29,7 +29,8 @@
     "joi": "^10.2.2",
     "morgan": "^1.8.1",
     "puid": "^1.0.5",
-    "request": "^2.80.0"
+    "request": "^2.80.0",
+    "request-promise": "^4.2.0"
   },
   "devDependencies": {
     "codecov": "^1.0.1",

@@ -1,7 +1,6 @@
 'use strict';
 
-const request = require('request');
-const status = require('http-status');
+const request = require('request-promise');
 const crypto = require('crypto');
 const Puid = require('puid');
 const Joi = require('joi');
@@ -28,62 +27,50 @@ const loginSchema = Joi.object().keys({
     password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required()
 });
 
-User.checkDB = (func) => {
-    request.head(dbUrl, (err, res, body) => {
-        if (err || (res.statusCode === status.INTERNAL_SERVER_ERROR)) {
-            func(err, res, body);
-        } else {
-            request.put(dbUrl, func);
-        }
-    });
-};
+User.checkDB = request.head(dbUrl)
+    .then((body) => Promise.resolve(body))
+    .catch(() => request.put(dbUrl));
 
-User.create = (user, func) => {
+User.create = (user) => {
     let id = idGenerator.generate();
 
     const result = Joi.validate(user, userSchema);
 
     if (result.error) {
-        func(result.error, {statusCode: status.BAD_REQUEST}, result.error.details);
+        return Promise.reject(result.error);
     } else {
         // encrypt password
         user.salt = crypto.randomBytes(16).toString('hex');
         user.hash = crypto.pbkdf2Sync(user.password, user.salt, 1000, 224, 'sha224').toString('hex');
         delete user.password;
 
-        request({
+        user.notValidated = true;
+
+        return request({
             method: 'PUT',
             url: `${dbUrl}/${id}`,
             json: user
-        }, func);
+        });
     }
 };
 
-User.delete = (id, rev, func) => {
-    request.delete(`${dbUrl}/${id}?rev=${rev}`, func);
-};
+User.delete = (id, rev) => request.delete(`${dbUrl}/${id}?rev=${rev}`);
 
-User.update = (id, rev, user, func) => {
-    request({
-        method: 'PUT',
-        url: `${dbUrl}/${id}?rev=${rev}`,
-        json: user
-    }, func);
-};
+User.update = (id, rev, user) => request({
+    method: 'PUT',
+    url: `${dbUrl}/${id}?rev=${rev}`,
+    json: user
+});
 
-User.findById = (id, func) => {
-    request.get(`${dbUrl}/${id}`, func);
-};
+User.findById = (id) => request.get(`${dbUrl}/${id}`);
 
-User.findAll = (func) => {
-    request.get(dbUrl + '/_all_docs', func);
-};
+User.findAll = request.get(dbUrl + '/_all_docs');
 
-User.login = (user, func) => {
+User.login = (user) => new Promise((reject, resolve) => {
     const result = Joi.validate(user, loginSchema);
 
     if (result.error) {
-        func(result.error, {statusCode: status.BAD_REQUEST}, result.error.details);
+        reject(result.error);
     } else {
         const query = {
             selector: {
@@ -95,17 +82,14 @@ User.login = (user, func) => {
             method: 'POST',
             url: `${dbUrl}/_find`,
             json: query
-        }, (err, res, body) => {
+        }).then((body) => {
             const finded = body.docs[0];
-            if (err || (res.statusCode === status.INTERNAL_SERVER_ERROR || !finded)) {
-                func(err, res);
-            } else {
-                // decrypt password
-                const hash = crypto.pbkdf2Sync(user.password, finded.salt, 1000, 224, 'sha224').toString('hex');
-                func(null, {statusCode: status.OK}, {result: hash === finded.hash});
-            }
-        });
+
+            // decrypt password
+            const hash = crypto.pbkdf2Sync(user.password, finded.salt, 1000, 224, 'sha224').toString('hex');
+            resolve({result: hash === finded.hash});
+        }).catch(reject);
     }
-};
+});
 
 module.exports = User;
