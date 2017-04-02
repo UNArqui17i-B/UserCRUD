@@ -8,9 +8,10 @@ const Joi = require('joi');
 
 // CouchDB url
 const DB_PORT = process.env.DB_PORT || 5984;
-const DB_ROOT_URL = process.env.DB_ROOT_URL || 'localhost';
-const url = `http://${DB_ROOT_URL}:${DB_PORT}/`;
-const dbUrl = url + 'blinkbox_users';
+const DB_URL = process.env.DB_URL || 'localhost';
+const DB_NAME = process.env.DB_NAME || 'blinkbox_users';
+const url = `http://${DB_URL}:${DB_PORT}/`;
+const dbUrl = url + DB_NAME;
 
 let User = {};
 const idGenerator = new Puid();
