@@ -11,7 +11,7 @@ services:
     build: .
     environment:
       DB_PORT: '5984'
-      DB_ROOT_URL: 'users_db'
+      DB_URL: 'users_db'
     ports:
       - '4000:4000'
     links:
