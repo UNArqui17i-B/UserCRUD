@@ -12,12 +12,6 @@ types:
             email: string
             password: string
 
-    Login:
-        type: object
-        properties:
-            email: string
-            password: string
-
 # Routes
 /users:
     description: User management
@@ -40,9 +34,3 @@ types:
 
             delete:
                 description: Delete a user
-
-    /login:
-        post:
-            description: Check valid field
-            body:
-                type: Login
