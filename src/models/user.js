@@ -22,11 +22,6 @@ const userSchema = Joi.object().keys({
     password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required()
 });
 
-const loginSchema = Joi.object().keys({
-    email: Joi.string().email().required(),
-    password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required()
-});
-
 User.checkDB = request.head(dbUrl)
     .then((body) => Promise.resolve(body))
     .catch(() => request.put(dbUrl));
@@ -65,31 +60,5 @@ User.update = (id, rev, user) => request({
 User.findById = (id) => request.get(`${dbUrl}/${id}`);
 
 User.findAll = request.get(dbUrl + '/_all_docs');
-
-User.login = (user) => new Promise((resolve, reject) => {
-    const result = Joi.validate(user, loginSchema);
-
-    if (result.error) {
-        reject(result.error);
-    } else {
-        const query = {
-            selector: {
-                email: user.email
-            }
-        };
-
-        request({
-            method: 'POST',
-            url: `${dbUrl}/_find`,
-            json: query
-        }).then((body) => {
-            const finded = body.docs[0];
-
-            // decrypt password
-            const hash = crypto.pbkdf2Sync(user.password, finded.salt, 1000, 224, 'sha224').toString('hex');
-            resolve({result: hash === finded.hash});
-        }).catch(reject);
-    }
-});
 
 module.exports = User;

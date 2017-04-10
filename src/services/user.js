@@ -43,12 +43,5 @@ module.exports = function (User) {
             .catch((err) => res.status(status.BAD_REQUEST).send(err));
     });
 
-    // check valid user and password
-    router.post('/login', function (req, res) {
-        User.login(req.body)
-            .then((body) => res.status(status.OK).send(body))
-            .catch((err) => res.status(status.BAD_REQUEST).send(err));
-    });
-
     return router;
 };
