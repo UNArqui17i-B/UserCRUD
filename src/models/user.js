@@ -53,7 +53,7 @@ User.create = (user) => {
 User.delete = (id) => request.get(`${dbUrl}/${id}`)
     .then((user) => {
         user = JSON.parse(user);
-        return request.delete(`${dbUrl}/${id}?rev=${user._rev}`)
+        return request.delete(`${dbUrl}/${id}?rev=${user._rev}`);
     });
 
 User.update = (id, user) => request.get(`${dbUrl}/${id}`)
