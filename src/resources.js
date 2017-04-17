@@ -21,7 +21,7 @@ User.checkDB.catch(console.error);
 
 // json content-type
 app.use(function (req, res, next) {
-    res.header("Content-Type",'application/json');
+    res.header('Content-Type', 'application/json');
     next();
 });
 
