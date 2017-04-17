@@ -27,11 +27,10 @@ types:
         get:
             description: Search a user
 
-        /{rev}:
-            put:
-                description: Update a user
-                body:
-                    type: User
+        put:
+            description: Update a user
+            body:
+                type: User
 
-            delete:
-                description: Delete a user
+        delete:
+            description: Delete a user
