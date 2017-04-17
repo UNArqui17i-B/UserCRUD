@@ -8,13 +8,8 @@ types:
     User:
         type: object
         properties:
-            name: string
-            email: string
-            password: string
-
-    Login:
-        type: object
-        properties:
+            lastName: string
+            firstName: string
             email: string
             password: string
 
@@ -32,17 +27,10 @@ types:
         get:
             description: Search a user
 
-        /{rev}:
-            put:
-                description: Update a user
-                body:
-                    type: User
-
-            delete:
-                description: Delete a user
-
-    /login:
-        post:
-            description: Check valid field
+        put:
+            description: Update a user
             body:
-                type: Login
+                type: User
+
+        delete:
+            description: Delete a user
