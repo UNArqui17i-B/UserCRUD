@@ -30,15 +30,15 @@ module.exports = function (User) {
     });
 
     // update a User
-    router.put('/:id/:rev', function (req, res) {
-        User.update(req.params.id, req.params.rev, req.body)
+    router.put('/:id', function (req, res) {
+        User.update(req.params.id, req.body)
             .then((body) => res.status(status.OK).send(body))
             .catch((err) => res.status(status.BAD_REQUEST).send(err));
     });
 
     // delete a User
-    router.delete('/:id/:rev', function (req, res) {
-        User.delete(req.params.id, req.params.rev)
+    router.delete('/:id', function (req, res) {
+        User.delete(req.params.id)
             .then((body) => res.status(status.OK).send(body))
             .catch((err) => res.status(status.BAD_REQUEST).send(err));
     });

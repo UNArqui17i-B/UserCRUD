@@ -50,26 +50,43 @@ User.create = (user) => {
     }
 };
 
-User.delete = (id, rev) => request.delete(`${dbUrl}/${id}?rev=${rev}`);
+User.delete = (id) => request.get(`${dbUrl}/${id}`)
+    .then((user) => {
+        user = JSON.parse(user);
+        return request.delete(`${dbUrl}/${id}?rev=${user._rev}`)
+    });
 
-User.update = (id, rev, user) => {
-    const result = Joi.validate(user, userSchema);
+User.update = (id, user) => request.get(`${dbUrl}/${id}`)
+    .then((oldUser) => {
+        oldUser = JSON.parse(oldUser);
+        let newUser = {
+            firstName: user.firstName || oldUser.firstName,
+            lastName: user.lastName || oldUser.lastName,
+            email: oldUser.email,
+            password: user.password
+        };
 
-    if (result.error) {
-        return Promise.reject(result.error);
-    } else {
-        // encrypt password
-        user.salt = crypto.randomBytes(16).toString('hex');
-        user.hash = crypto.pbkdf2Sync(user.password, user.salt, 1000, 224, 'sha224').toString('hex');
-        delete user.password;
+        const result = Joi.validate(newUser, userSchema);
 
-        return request({
-            method: 'PUT',
-            url: `${dbUrl}/${id}`,
-            json: user
-        });
-    }
-};
+        if (result.error) {
+            return Promise.reject(result.error);
+        } else {
+            newUser.notValidated = user.notValidated;
+            newUser.token = user.token;
+            newUser.expDate = user.expDate;
+
+            // encrypt password
+            newUser.salt = crypto.randomBytes(16).toString('hex');
+            newUser.hash = crypto.pbkdf2Sync(newUser.password, newUser.salt, 1000, 224, 'sha224').toString('hex');
+            delete newUser.password;
+
+            return request({
+                method: 'PUT',
+                url: `${dbUrl}/${id}?rev=${oldUser._rev}`,
+                json: newUser
+            });
+        }
+    }).catch((err) => Promise.reject(err));
 
 User.findById = (id) => request.get(`${dbUrl}/${id}`);
 
