@@ -72,8 +72,6 @@ User.update = (id, user) => request.get(`${dbUrl}/${id}`)
             return Promise.reject(result.error);
         } else {
             newUser.notValidated = user.notValidated;
-            newUser.token = user.token;
-            newUser.expDate = user.expDate;
 
             // encrypt password
             newUser.salt = crypto.randomBytes(16).toString('hex');
