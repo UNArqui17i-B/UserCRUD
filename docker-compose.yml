@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 services:
   users_db:
     image: klaemo/couchdb:2.0.0
